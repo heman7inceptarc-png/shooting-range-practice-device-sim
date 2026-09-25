@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0b0c10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Range Master Pro Timer — Mobile Responsive Simulator</title>
+  <style>
+    :root {
+      --rugged-bg: #1c1d21;
+      --rugged-dark: #121316;
+      --rugged-border: #2a2c33;
+      --green-glow: #22c55e;
+      --red-glow: #ef4444;
+      --orange-glow: #f97316;
+      --blue-glow: #38bdf8;
+      --cyan-accent: #38bdf8;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #0b0c10;
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      margin: 4px 0 2px 0;
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+      margin-bottom: 12px;
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .top-controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .mode-toggle-bar {
+      background: #17181c;
+      border: 2px solid #334155;
+      border-radius: 30px;
+      padding: 3px;
+      display: flex;
+      gap: 4px;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 20px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 0.78rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      touch-action: manipulation;
+    }
+
+    .mode-btn.active {
+      background: #0284c7;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    }
+
+    .demo-checkbox-label {
+      font-size: 0.8rem;
+      color: #facc15;
+      background: #1e293b;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .device-grid {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    /* MASTER DEVICE CHASSIS */
+    .master-device {
+      background: linear-gradient(145deg, #24262c, #17181c);
+      border: 3px solid #363942;
+      border-radius: 16px;
+      padding: 14px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .device-branding {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 800;
+      font-size: 0.78rem;
+      color: #64748b;
+      letter-spacing: 1px;
+      border-bottom: 2px solid #2a2c33;
+      padding-bottom: 5px;
+    }
+
+    /* Selection Row */
+    .selection-controls {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .event-select-box, .load-select-box, .custom-time-box {
+      background: #0f172a;
+      color: #38bdf8;
+      border: 2px solid #334155;
+      padding: 8px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.82rem;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .event-select-box { flex: 2; min-width: 180px; }
+    .load-select-box { flex: 1; min-width: 100px; }
+    .custom-time-box { width: 90px; display: none; }
+
+    /* TFT Screen Container */
+    .tft-display {
+      background-color: #040810;
+      border: 2px solid #1e293b;
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 290px;
+      font-family: 'Courier New', Courier, monospace;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.9);
+    }
+
+    .tft-header {
+      color: #38bdf8;
+      font-size: 0.8rem;
+      font-weight: bold;
+      border-bottom: 1px solid #1e3a8a;
+      padding-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .shots-container {
+      flex: 1;
+      overflow-y: auto;
+      margin: 6px 0;
+      padding-right: 2px;
+      max-height: 180px;
+    }
+
+    .tft-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      margin: 3px 0;
+      padding: 4px 6px;
+      background: #0d1322;
+      border-radius: 4px;
+      border-left: 3px solid #38bdf8;
+    }
+
+    .tft-row.delay-row {
+      border-left: 3px solid #ef4444;
+      background: #270f14;
+    }
+
+    .tft-shot-tag {
+      font-weight: bold;
+      color: #cbd5e1;
+    }
+
+    .tft-split-val {
+      color: #38bdf8;
+      font-weight: bold;
+    }
+
+    .tft-total-val {
+      color: #facc15;
+      font-weight: bold;
+    }
+
+    .delay-badge {
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 0.62rem;
+      font-weight: bold;
+      padding: 1px 4px;
+      border-radius: 3px;
+      animation: flashDelay 1s infinite alternate;
+    }
+
+    @keyframes flashDelay {
+      0% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    .gunshot-trigger-panel {
+      background: #0f172a;
+      border: 2px solid #dc2626;
+      border-radius: 10px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bang-btn {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      border: 2px solid #f87171;
+      color: white;
+      font-weight: bold;
+      font-size: 0.88rem;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(220, 38, 38, 0.6);
+      touch-action: manipulation;
+      min-height: 44px;
+    }
+    .bang-btn:active { transform: scale(0.95); }
+
+    .controls-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: #17181c;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid #2a2c33;
+    }
+
+    .speaker-grill {
+      width: 38px;
+      height: 38px;
+      background: #0f172a;
+      border-radius: 50%;
+      border: 2px solid #334155;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 4px;
+      gap: 3px;
+      align-items: center;
+      justify-items: center;
+      flex-shrink: 0;
+    }
+
+    .speaker-hole {
+      width: 4px;
+      height: 4px;
+      background: #334155;
+      border-radius: 50%;
+    }
+
+    .push-btns {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .rugged-btn {
+      flex: 1;
+      padding: 12px 6px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 800;
+      font-size: 0.8rem;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+      touch-action: manipulation;
+      min-height: 44px;
+    }
+
+    .btn-start-illuminate {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      color: white;
+      border: 1px solid #4ade80;
+    }
+
+    .btn-stop-illuminate {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      color: white;
+      border: 1px solid #f87171;
+    }
+
+    .rotary-knob-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+      flex-shrink: 0;
+    }
+
+    .knob {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #3a3d47 0%, #1c1d22 100%);
+      border: 3px solid #475569;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+      transition: transform 0.2s;
+    }
+
+    .knob-notch {
+      width: 3px;
+      height: 12px;
+      background: #38bdf8;
+      position: absolute;
+      top: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+
+    /* COMM INTERCONNECT ANIMATION */
+    .comm-line-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 120px;
+      padding: 10px 0;
+    }
+
+    .wired-line {
+      width: 100%;
+      height: 5px;
+      background: #334155;
+      border-radius: 3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wire-pulse {
+      position: absolute;
+      top: 0;
+      left: -30%;
+      width: 30%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+    }
+
+    @keyframes sendSignal {
+      0% { left: -30%; }
+      100% { left: 100%; }
+    }
+
+    .wireless-waves {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .wave-ring {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #38bdf8;
+      border-radius: 50%;
+      opacity: 0;
+    }
+
+    @keyframes wavePulse {
+      0% { transform: scale(0.2); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    /* TARGET DEVICE */
+    .target-device {
+      background: linear-gradient(145deg, #1c1d21, #121316);
+      border: 3px solid #363942;
+      border-radius: 16px;
+      padding: 14px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .led-matrix-housing {
+      background: #000;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid #2a2c33;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 5px;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .pixel {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      background: #17181c;
+      box-shadow: inset 0 0 2px rgba(0,0,0,0.9);
+      transition: background-color 0.15s, box-shadow 0.15s;
+    }
+
+    .pixel.red {
+      background: #ef4444;
+      box-shadow: 0 0 12px #ef4444, inset 0 0 3px #fee2e2;
+    }
+
+    .pixel.green {
+      background: #22c55e;
+      box-shadow: 0 0 14px #22c55e, inset 0 0 3px #dcfce7;
+    }
+
+    .target-clamp-mount {
+      width: 100%;
+      height: 32px;
+      background: #2a2c33;
+      border-radius: 6px;
+      margin-top: 12px;
+      border: 1px solid #475569;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      box-sizing: border-box;
+      font-size: 0.72rem;
+      color: #cbd5e1;
+      font-weight: bold;
+    }
+
+    .step-indicator {
+      font-size: 0.72rem;
+      background: #1e293b;
+      padding: 4px 6px;
+      border-radius: 4px;
+      color: #38bdf8;
+      border: 1px solid #334155;
+    }
+
+    /* MEDIA QUERIES FOR MOBILE PHONES (< 600px) */
+    @media (max-width: 600px) {
+      body { padding: 6px; }
+      .device-grid { gap: 14px; }
+      .master-device { padding: 10px; }
+      .target-device { padding: 10px; }
+      .comm-line-box { padding: 0; width: 100%; height: 20px; }
+      .wired-line { height: 4px; }
+      .tft-display { min-height: 270px; padding: 8px; }
+      .tft-row { font-size: 0.7rem; }
+      .gunshot-trigger-panel { flex-direction: column; align-items: stretch; text-align: center; }
+      .bang-btn { width: 100%; }
+      .controls-row { flex-wrap: wrap; justify-content: center; }
+      .speaker-grill { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Range Master Pro</h1>
+  <div class="subtitle">📱 Mobile Responsive • ISSF & Custom Pistol Shooting Timer</div>
+
+  <!-- Top Bar Controls -->
+  <div class="top-controls-bar">
+    <div class="mode-toggle-bar">
+      <button class="mode-btn active" id="btn-wired" onclick="setCommMode('wired')">🔌 WIRED (30m)</button>
+      <button class="mode-btn" id="btn-wireless" onclick="setCommMode('wireless')">📡 ESP-NOW</button>
+    </div>
+
+    <label class="demo-checkbox-label">
+      <input type="checkbox" id="fast-load-chk" checked />
+      ⚡ 5s Demo Load
+    </label>
+  </div>
+
+  <div class="device-grid">
+
+    <!-- MASTER DEVICE CHASSIS -->
+    <div class="master-device">
+      <div class="device-branding">
+        <span>RANGE MASTER PRO • CONTROLLER</span>
+        <span id="comm-status-badge">WIRED</span>
+      </div>
+
+      <!-- Selection Controls (Series + Load Time + Custom Time) -->
+      <div class="selection-controls">
+        <select class="event-select-box" id="event-select" onchange="onSeriesDropdownChanged()">
+          <option value="0">1. 4 Minutes Series</option>
+          <option value="1">2. 5 × 3 Seconds Series</option>
+          <option value="2">3. 20 Seconds Series</option>
+          <option value="3">4. 10 Seconds Series</option>
+          <option value="4" selected>5. 8 Seconds Series</option>
+          <option value="5">6. 6 Seconds Series</option>
+          <option value="6">7. 4 Seconds Series</option>
+          <option value="7">8. 150 Seconds Series</option>
+          <option value="8">9. Custom Series</option>
+        </select>
+
+        <input type="number" class="custom-time-box" id="custom-time-input" value="15" min="1" max="300" placeholder="Sec" onchange="onCustomTimeChanged()" />
+
+        <select class="load-select-box" id="load-select" onchange="onLoadDropdownChanged()">
+          <option value="15">LOAD: 15s</option>
+          <option value="30">LOAD: 30s</option>
+          <option value="60" selected>LOAD: 60s</option>
+        </select>
+      </div>
+
+      <!-- TFT Screen -->
+      <div class="tft-display">
+        <div class="tft-header">
+          <span id="disp-event">DRILL: 8s RAPID</span>
+          <span id="disp-shot-badge" style="color:#facc15;">SHOTS: 0/5</span>
+        </div>
+
+        <div class="shots-container" id="shots-list">
+          <div style="color:#64748b; text-align:center; padding-top:35px; font-size:0.82rem;">
+            Tap KNOB to confirm settings,<br/>then tap <strong style="color:#22c55e">PRESS START</strong>!<br/><br/>
+            <span class="step-indicator" id="step-guide">STEP 1: Select Series ➔ Tap Knob</span>
+          </div>
+        </div>
+
+        <div style="border-top:1px dashed #334155; padding-top:4px; margin-top:2px;">
+          <div class="tft-row" style="background:none; border:none; padding:0;">
+            <span style="color:#38bdf8; font-weight:bold; font-size:0.72rem;">TIMER 2 (AVG SPLIT):</span>
+            <span id="val-avg" style="color:#38bdf8; font-weight:bold; font-size:0.82rem;">--</span>
+          </div>
+          <div class="tft-row" style="background:none; border:none; padding:0; margin-top:2px;">
+            <span style="color:#facc15; font-weight:bold; font-size:0.72rem;">TIMER 1 (TOTAL TIME):</span>
+            <span id="val-total" style="color:#facc15; font-weight:bold; font-size:0.82rem;">--</span>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid #1e3a8a; padding-top:4px; font-size:0.78rem; display:flex; justify-content:space-between; align-items:center;">
+          <span>STAGE: <strong id="stage-text" style="color:#22c55e">1. TIMER MENU</strong></span>
+          <span>TIME: <strong id="timer-text" style="color:#38bdf8">--</strong></span>
+        </div>
+      </div>
+
+      <!-- GUNSHOT SOUND / SENSOR TRIGGER PANEL -->
+      <div class="gunshot-trigger-panel">
+        <div>
+          <div style="font-weight:bold; font-size:0.82rem; color:#f87171;">🎤 ACOUSTIC SHOT SENSOR</div>
+          <div style="font-size:0.72rem; color:#cbd5e1;">Tap Button or press <kbd style="background:#334155; padding:1px 3px; border-radius:3px;">SPACEBAR</kbd></div>
+        </div>
+        <button class="bang-btn" onclick="triggerGunshot()">💥 BANG! (FIRE)</button>
+      </div>
+
+      <!-- Controls Row -->
+      <div class="controls-row">
+        <div class="speaker-grill">
+          <div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div>
+          <div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div>
+        </div>
+
+        <div class="push-btns">
+          <button class="rugged-btn btn-start-illuminate" onclick="startEventSequence()">START</button>
+          <button class="rugged-btn btn-stop-illuminate" onclick="stopSequence()">STOP</button>
+        </div>
+
+        <div class="rotary-knob-container" onclick="onKnobClick()">
+          <div class="knob" id="rotary-knob">
+            <div class="knob-notch"></div>
+          </div>
+          <div style="font-size:0.6rem; color:#38bdf8; margin-top:2px; font-weight:bold; text-align:center;">ROTATE/TAP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMM INTERCONNECT ANIMATION -->
+    <div class="comm-line-box">
+      <div class="wired-line" id="wired-box">
+        <div class="wire-pulse" id="pulse"></div>
+      </div>
+
+      <div class="wireless-waves" id="wireless-box">
+        <div class="wave-ring" id="wave-1"></div>
+        <div style="font-size:0.7rem; color:#38bdf8; font-weight:bold; text-align:center;">ESP-NOW 2.4GHz</div>
+      </div>
+
+      <div style="font-size:0.65rem; color:#94a3b8; margin-top:4px; text-align:center;" id="comm-desc">
+        30m Shielded Cable
+      </div>
+    </div>
+
+    <!-- TARGET DEVICE -->
+    <div class="target-device">
+      <div style="width:100%; display:flex; justify-content:space-between; font-size:0.78rem; color:#94a3b8; font-weight:bold; margin-bottom:8px;">
+        <span>TARGET LIGHT PANEL</span>
+        <span id="target-color-label" style="color:#64748b">DISPLAY: OFF</span>
+      </div>
+
+      <div class="led-matrix-housing" id="matrix"></div>
+
+      <div class="target-clamp-mount">
+        <span>CLAMP MOUNT</span>
+        <span id="target-mode-label" style="color:#38bdf8">WIRED RX</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const matrix = document.getElementById('matrix');
+    for (let i = 0; i < 64; i++) {
+      const p = document.createElement('div');
+      p.className = 'pixel';
+      matrix.appendChild(p);
+    }
+
+    const eventsData = [
+      { id: 1, name: "4 Minutes Series", voiceAnnounce: "4 minutes series", greenSec: 240, is5x3: false, isCustom: false },
+      { id: 2, name: "5 × 3 Seconds Series", voiceAnnounce: "5 by 3 seconds series", greenSec: 3, is5x3: true, isCustom: false },
+      { id: 3, name: "20 Seconds Series", voiceAnnounce: "20 seconds series", greenSec: 20, is5x3: false, isCustom: false },
+      { id: 4, name: "10 Seconds Series", voiceAnnounce: "10 seconds series", greenSec: 10, is5x3: false, isCustom: false },
+      { id: 5, name: "8 Seconds Series", voiceAnnounce: "8 seconds series", greenSec: 8, is5x3: false, isCustom: false },
+      { id: 6, name: "6 Seconds Series", voiceAnnounce: "6 seconds series", greenSec: 6, is5x3: false, isCustom: false },
+      { id: 7, name: "4 Seconds Series", voiceAnnounce: "4 seconds series", greenSec: 4, is5x3: false, isCustom: false },
+      { id: 8, name: "150 Seconds Series", voiceAnnounce: "150 seconds series", greenSec: 150, is5x3: false, isCustom: false },
+      { id: 9, name: "Custom Series", voiceAnnounce: "Custom series", greenSec: 15, is5x3: false, isCustom: true }
+    ];
+
+    let currentEventIdx = 4;
+    let selectedLoadSec = 60;
+    let customGreenSec = 15;
+    let menuStep = 1;
+    let activeCommMode = 'wired';
+    let timerId = null;
+    let greenTimerId = null;
+    let isRunning = false;
+    let isMicSensorActive = false;
+    let greenStartTime = 0;
+    let shotLogs = [];
+    let knobAngle = 0;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        triggerGunshot();
+      }
+    });
+
+    function getActiveGreenDuration() {
+      const ev = eventsData[currentEventIdx];
+      return ev.isCustom ? customGreenSec : ev.greenSec;
+    }
+
+    function triggerGunshot() {
+      if (!isMicSensorActive) {
+        console.log("Gunshot ignored: Sensor inactive during Attention / Load / Unload stage.");
+        return;
+      }
+
+      if (shotLogs.length >= 5) {
+        console.log("Max 5 shots limit reached.");
+        return;
+      }
+
+      let now = Date.now();
+      let totalSec = (now - greenStartTime) / 1000.0;
+      
+      let prevTotal = shotLogs.length > 0 ? shotLogs[shotLogs.length - 1].totalSec : 0.0;
+      let splitSec = totalSec - prevTotal;
+
+      let greenDuration = getActiveGreenDuration();
+      let isDelay = totalSec > (greenDuration + 0.2);
+      let overtimeSec = isDelay ? (totalSec - greenDuration) : 0.0;
+
+      shotLogs.push({
+        shotNum: shotLogs.length + 1,
+        totalSec: totalSec,
+        splitSec: splitSec,
+        isDelay: isDelay,
+        overtimeSec: overtimeSec
+      });
+
+      playGunshotSoundEffect();
+      renderShotList();
+    }
+
+    function renderShotList() {
+      const container = document.getElementById('shots-list');
+      container.innerHTML = '';
+
+      document.getElementById('disp-shot-badge').innerText = `SHOTS: ${shotLogs.length}/5`;
+
+      shotLogs.forEach((shot) => {
+        const row = document.createElement('div');
+        row.className = shot.isDelay ? 'tft-row delay-row' : 'tft-row';
+        
+        let delayTagHTML = shot.isDelay 
+          ? `<span class="delay-badge">⚠️ DELAY (+${shot.overtimeSec.toFixed(2)}s)</span>` 
+          : `<span style="color:#22c55e; font-size:0.62rem; font-weight:bold;">VALID</span>`;
+
+        row.innerHTML = `
+          <span class="tft-shot-tag">S${shot.shotNum}</span>
+          <span>SPLIT: <span class="tft-split-val">${shot.splitSec.toFixed(2)}s</span></span>
+          <span>TOT: <span class="tft-total-val">${shot.totalSec.toFixed(2)}s</span></span>
+          ${delayTagHTML}
+        `;
+        container.appendChild(row);
+      });
+
+      container.scrollTop = container.scrollHeight;
+
+      if (shotLogs.length > 0) {
+        let lastTotal = shotLogs[shotLogs.length - 1].totalSec;
+        let sumSplits = shotLogs.reduce((acc, s) => acc + s.splitSec, 0);
+        let avgSplit = sumSplits / shotLogs.length;
+
+        document.getElementById('val-avg').innerText = avgSplit.toFixed(2) + "s";
+        document.getElementById('val-total').innerText = lastTotal.toFixed(2) + "s";
+      }
+    }
+
+    function playGunshotSoundEffect() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(25, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.5, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+      } catch(e){}
+    }
+
+    function resetBars() {
+      shotLogs = [];
+      document.getElementById('disp-shot-badge').innerText = "SHOTS: 0/5";
+      document.getElementById('val-avg').innerText = '--';
+      document.getElementById('val-total').innerText = '--';
+    }
+
+    function onKnobClick() {
+      if (isRunning) return;
+
+      knobAngle += 45;
+      document.getElementById('rotary-knob').style.transform = `rotate(${knobAngle}deg)`;
+
+      if (menuStep === 1) {
+        menuStep = 2;
+        updateMenuDisplay();
+      } else if (menuStep === 2) {
+        menuStep = 3;
+        updateMenuDisplay();
+      } else {
+        menuStep = 1;
+        updateMenuDisplay();
+      }
+    }
+
+    function onSeriesDropdownChanged() {
+      if (isRunning) return;
+      currentEventIdx = parseInt(document.getElementById('event-select').value);
+      const ev = eventsData[currentEventIdx];
+      document.getElementById('custom-time-input').style.display = ev.isCustom ? 'block' : 'none';
+      menuStep = 2;
+      updateMenuDisplay();
+    }
+
+    function onCustomTimeChanged() {
+      let val = parseInt(document.getElementById('custom-time-input').value);
+      if (isNaN(val) || val < 1) val = 1;
+      customGreenSec = val;
+      updateMenuDisplay();
+    }
+
+    function onLoadDropdownChanged() {
+      if (isRunning) return;
+      selectedLoadSec = parseInt(document.getElementById('load-select').value);
+      menuStep = 3;
+      updateMenuDisplay();
+    }
+
+    function updateMenuDisplay() {
+      const ev = eventsData[currentEventIdx];
+      let activeGreen = getActiveGreenDuration();
+      
+      document.getElementById('disp-event').innerText = ev.isCustom ? `DRILL: CUSTOM (${activeGreen}s)` : `DRILL: ${ev.name}`;
+      document.getElementById('event-select').value = currentEventIdx;
+      document.getElementById('load-select').value = selectedLoadSec;
+
+      const container = document.getElementById('shots-list');
+
+      if (menuStep === 1) {
+        setStageText("1. TIMER MENU", "#38bdf8");
+        container.innerHTML = `
+          <div style="color:#cbd5e1; text-align:center; padding-top:20px; font-size:0.82rem;">
+            <strong style="color:#38bdf8">1. TIMER MENU</strong><br/>
+            Selected: <span style="color:#facc15">${ev.name} ${ev.isCustom ? `(${activeGreen}s)` : ''}</span><br/><br/>
+            <span class="step-indicator">Rotate/Tap Knob to Select Load Time</span>
+          </div>
+        `;
+      } else if (menuStep === 2) {
+        setStageText("2. LOAD TIME SELECT", "#ea580c");
+        container.innerHTML = `
+          <div style="color:#cbd5e1; text-align:center; padding-top:20px; font-size:0.82rem;">
+            <strong style="color:#ea580c">2. LOAD TIME SELECTION</strong><br/>
+            Selected Load: <span style="color:#facc15">${selectedLoadSec} Seconds</span><br/>
+            (Options: 15s | 30s | 60s)<br/><br/>
+            <span class="step-indicator">Tap Knob to Confirm & Ready</span>
+          </div>
+        `;
+      } else {
+        setStageText("3. SHOW SELECTED (READY)", "#22c55e");
+        container.innerHTML = `
+          <div style="color:#cbd5e1; text-align:center; padding-top:15px; font-size:0.82rem;">
+            <strong style="color:#22c55e">READY TO START</strong><br/>
+            Series: <span style="color:#38bdf8">${ev.name} ${ev.isCustom ? `(${activeGreen}s)` : ''}</span><br/>
+            Load Time: <span style="color:#facc15">${selectedLoadSec} Seconds</span><br/><br/>
+            <span class="step-indicator" style="background:#15803d; color:#fff;">TAP START BUTTON BELOW</span>
+          </div>
+        `;
+      }
+    }
+
+    function setCommMode(mode) {
+      activeCommMode = mode;
+      if (mode === 'wired') {
+        document.getElementById('btn-wired').className = 'mode-btn active';
+        document.getElementById('btn-wireless').className = 'mode-btn';
+        document.getElementById('wired-box').style.display = 'block';
+        document.getElementById('wireless-box').style.display = 'none';
+        document.getElementById('comm-desc').innerText = "30m Shielded Cable";
+        document.getElementById('comm-status-badge').innerText = "WIRED";
+        document.getElementById('target-mode-label').innerText = "WIRED RX";
+      } else {
+        document.getElementById('btn-wired').className = 'mode-btn';
+        document.getElementById('btn-wireless').className = 'mode-btn active';
+        document.getElementById('wired-box').style.display = 'none';
+        document.getElementById('wireless-box').style.display = 'flex';
+        document.getElementById('comm-desc').innerText = "2.4GHz Direct";
+        document.getElementById('comm-status-badge').innerText = "ESP-NOW";
+        document.getElementById('target-mode-label').innerText = "ESP-NOW RX";
+      }
+    }
+
+    function triggerSignalAnim() {
+      if (activeCommMode === 'wired') {
+        const p = document.getElementById('pulse');
+        p.style.animation = 'none';
+        p.offsetHeight;
+        p.style.animation = 'sendSignal 0.5s linear';
+      } else {
+        const w = document.getElementById('wave-1');
+        w.style.animation = 'none';
+        w.offsetHeight;
+        w.style.animation = 'wavePulse 0.5s ease-out';
+      }
+    }
+
+    function setTargetLightColor(colorClass, labelText, labelColor) {
+      triggerSignalAnim();
+      setTimeout(() => {
+        document.querySelectorAll('.pixel').forEach(px => px.className = 'pixel ' + colorClass);
+        const lbl = document.getElementById('target-color-label');
+        lbl.innerText = "DISPLAY: " + labelText;
+        lbl.style.color = labelColor;
+      }, 300);
+    }
+
+    function speakCue(text) {
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95;
+        window.speechSynthesis.speak(u);
+      }
+    }
+
+    function setStageText(text, color) {
+      const st = document.getElementById('stage-text');
+      st.innerText = text;
+      st.style.color = color;
+    }
+
+    function startEventSequence() {
+      if (isRunning) return;
+      isRunning = true;
+      isMicSensorActive = false;
+      resetBars();
+
+      const ev = eventsData[currentEventIdx];
+
+      setStageText("ANNOUNCING SERIES...", "#38bdf8");
+      speakCue(ev.voiceAnnounce);
+
+      setTimeout(() => {
+        speakCue("Load!");
+        setStageText("AUDIO: LOAD", "#ea580c");
+
+        setTimeout(() => {
+          runLoadCountdownStage(ev);
+        }, 1200);
+
+      }, 2000);
+    }
+
+    function runLoadCountdownStage(ev) {
+      isMicSensorActive = false;
+      const fastLoad = document.getElementById('fast-load-chk').checked;
+      let actualLoadSec = fastLoad ? 5 : selectedLoadSec;
+
+      setStageText("LOAD TIMER (" + actualLoadSec + "s)", "#ea580c");
+      setTargetLightColor("", "OFF (Load Phase)", "#64748b");
+
+      let rem = actualLoadSec;
+      document.getElementById('timer-text').innerText = rem + "s";
+
+      timerId = setInterval(() => {
+        rem--;
+        document.getElementById('timer-text').innerText = rem + "s";
+        if (rem <= 0) {
+          clearInterval(timerId);
+          runAttentionStage(ev);
+        }
+      }, 1000);
+    }
+
+    function runAttentionStage(ev) {
+      isMicSensorActive = false; 
+
+      setStageText("ATTENTION (RED 7s)", "#dc2626");
+      setTargetLightColor("red", "SOLID RED (Attention 7s)", "#ef4444");
+      speakCue("Attention!");
+
+      let rem = 7;
+      document.getElementById('timer-text').innerText = rem + "s";
+      timerId = setInterval(() => {
+        rem--;
+        document.getElementById('timer-text').innerText = rem + "s";
+        if (rem <= 0) {
+          clearInterval(timerId);
+          runGreenShootingStage(ev, 1);
+        }
+      }, 1000);
+    }
+
+    function runGreenShootingStage(ev, roundNum) {
+      isMicSensorActive = true; 
+      greenStartTime = Date.now();
+
+      const container = document.getElementById('shots-list');
+      if (shotLogs.length === 0) {
+        container.innerHTML = `
+          <div style="color:#22c55e; text-align:center; padding-top:35px; font-size:0.82rem; font-weight:bold;">
+            🎯 GREEN LIGHT ACTIVE!<br/>Tap 💥 BANG! or Spacebar (Max 5)!
+          </div>
+        `;
+      }
+
+      if (ev.is5x3) {
+        setStageText("FIRE! R" + roundNum + "/5", "#22c55e");
+      } else {
+        setStageText("FIRE! (GREEN)", "#22c55e");
+      }
+      setTargetLightColor("green", "GREEN (Shooting Allowed)", "#22c55e");
+
+      let totalTimeSec = getActiveGreenDuration();
+
+      greenTimerId = setInterval(() => {
+        let elapsedSec = (Date.now() - greenStartTime) / 1000;
+        let remSec = Math.max(0, totalTimeSec - elapsedSec);
+        document.getElementById('timer-text').innerText = remSec.toFixed(1) + "s";
+
+        if (elapsedSec >= totalTimeSec) {
+          clearInterval(greenTimerId);
+
+          if (ev.is5x3 && roundNum < 5) {
+            run5x3RedPause(ev, roundNum);
+          } else {
+            runRedStopStage(ev);
+          }
+        }
+      }, 100);
+    }
+
+    function run5x3RedPause(ev, roundNum) {
+      setTimeout(() => { isMicSensorActive = false; }, 500);
+
+      setStageText("PAUSE R" + roundNum + " (RED 7s)", "#dc2626");
+      setTargetLightColor("red", "SOLID RED (7s Pause)", "#ef4444");
+
+      let rem = 7;
+      document.getElementById('timer-text').innerText = rem + "s";
+      timerId = setInterval(() => {
+        rem--;
+        document.getElementById('timer-text').innerText = rem + "s";
+        if (rem <= 0) {
+          clearInterval(timerId);
+          runGreenShootingStage(ev, roundNum + 1);
+        }
+      }, 1000);
+    }
+
+    function runRedStopStage(ev) {
+      setTimeout(() => { isMicSensorActive = false; }, 500);
+
+      setStageText("RED / STOP (7s)", "#dc2626");
+      setTargetLightColor("red", "SOLID RED (Stop 7s)", "#ef4444");
+
+      let rem = 7;
+      document.getElementById('timer-text').innerText = rem + "s";
+      timerId = setInterval(() => {
+        rem--;
+        document.getElementById('timer-text').innerText = rem + "s";
+        if (rem <= 0) {
+          clearInterval(timerId);
+          runUnloadStage();
+        }
+      }, 1000);
+    }
+
+    function runUnloadStage() {
+      isMicSensorActive = false;
+      setStageText("UNLOAD", "#ea580c");
+      setTargetLightColor("", "OFF (Unload Phase)", "#64748b");
+      speakCue("Unload!");
+
+      setTimeout(() => {
+        menuStep = 1;
+        updateMenuDisplay();
+        setTargetLightColor("", "OFF (Display Off)", "#64748b");
+        document.getElementById('timer-text').innerText = "DONE";
+        isRunning = false;
+      }, 3000);
+    }
+
+    function stopSequence() {
+      clearInterval(timerId);
+      clearInterval(greenTimerId);
+      isMicSensorActive = false;
+      setTargetLightColor("", "OFF (Stopped)", "#64748b");
+      setStageText("STOPPED", "#dc2626");
+      document.getElementById('timer-text').innerText = "--";
+      isRunning = false;
+      menuStep = 1;
+      updateMenuDisplay();
+    }
+
+    updateMenuDisplay();
+  </script>
+</body>
+</html>
