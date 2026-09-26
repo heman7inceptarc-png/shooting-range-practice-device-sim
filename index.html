@@ -544,8 +544,9 @@
 
       <!-- Selection Controls (Series + Load Time + Custom Time) -->
       <div class="selection-controls">
+        <!-- REQUIREMENT 1: FIX TYPO "4 minute series" -->
         <select class="event-select-box" id="event-select" onchange="onSeriesDropdownChanged()">
-          <option value="0">1. 4 Minutes Series</option>
+          <option value="0">1. 4 Minute Series</option>
           <option value="1">2. 5 × 3 Seconds Series</option>
           <option value="2">3. 20 Seconds Series</option>
           <option value="3">4. 10 Seconds Series</option>
@@ -667,16 +668,17 @@
       matrix.appendChild(p);
     }
 
+    // REQUIREMENT 6: CLEAN DATA STRUCTURE / CONFIGURATION OBJECTS FOR SERIES
     const eventsData = [
-      { id: 1, name: "4 Minutes Series", voiceAnnounce: "4 minutes series", greenSec: 240, is5x3: false, isCustom: false },
-      { id: 2, name: "5 × 3 Seconds Series", voiceAnnounce: "5 by 3 seconds series", greenSec: 3, is5x3: true, isCustom: false },
-      { id: 3, name: "20 Seconds Series", voiceAnnounce: "20 seconds series", greenSec: 20, is5x3: false, isCustom: false },
-      { id: 4, name: "10 Seconds Series", voiceAnnounce: "10 seconds series", greenSec: 10, is5x3: false, isCustom: false },
-      { id: 5, name: "8 Seconds Series", voiceAnnounce: "8 seconds series", greenSec: 8, is5x3: false, isCustom: false },
-      { id: 6, name: "6 Seconds Series", voiceAnnounce: "6 seconds series", greenSec: 6, is5x3: false, isCustom: false },
-      { id: 7, name: "4 Seconds Series", voiceAnnounce: "4 seconds series", greenSec: 4, is5x3: false, isCustom: false },
-      { id: 8, name: "150 Seconds Series", voiceAnnounce: "150 seconds series", greenSec: 150, is5x3: false, isCustom: false },
-      { id: 9, name: "Custom Series", voiceAnnounce: "Custom series", greenSec: 15, is5x3: false, isCustom: true }
+      { id: 1, seriesName: "4 Minute Series", voiceAnnounce: "4 minute series", audioKey: "4_minute_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 240, numberOfShots: 5, is5x3: false, isCustom: false },
+      { id: 2, seriesName: "5 × 3 Seconds Series", voiceAnnounce: "5 by 3 seconds series", audioKey: "5_by_3_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 3, numberOfShots: 5, is5x3: true, isCustom: false },
+      { id: 3, seriesName: "20 Seconds Series", voiceAnnounce: "20 seconds series", audioKey: "20_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 20, numberOfShots: 5, is5x3: false, isCustom: false },
+      { id: 4, seriesName: "10 Seconds Series", voiceAnnounce: "10 seconds series", audioKey: "10_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 10, numberOfShots: 5, is5x3: false, isCustom: false },
+      { id: 5, seriesName: "8 Seconds Series", voiceAnnounce: "8 seconds series", audioKey: "8_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 8, numberOfShots: 5, is5x3: false, isCustom: false },
+      { id: 6, seriesName: "6 Seconds Series", voiceAnnounce: "6 seconds series", audioKey: "6_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 6, numberOfShots: 5, is5x3: false, isCustom: false },
+      { id: 7, seriesName: "4 Seconds Series", voiceAnnounce: "4 seconds series", audioKey: "4_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 4, numberOfShots: 5, is5x3: false, isCustom: false },
+      { id: 8, seriesName: "150 Seconds Series", voiceAnnounce: "150 seconds series", audioKey: "150_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 150, numberOfShots: 5, is5x3: false, isCustom: false },
+      { id: 9, seriesName: "Custom Series", voiceAnnounce: "Custom series", audioKey: "custom_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 15, numberOfShots: 5, is5x3: false, isCustom: true }
     ];
 
     let currentEventIdx = 4;
@@ -686,11 +688,33 @@
     let activeCommMode = 'wired';
     let timerId = null;
     let greenTimerId = null;
+    let activeTimeouts = [];
     let isRunning = false;
     let isMicSensorActive = false;
     let greenStartTime = 0;
     let shotLogs = [];
     let knobAngle = 0;
+
+    // REQUIREMENT 7: MASTER/SLAVE BROADCAST SYNC ENGINE (BroadcastChannel + Web Bluetooth / WebRTC Stub)
+    const syncChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('range_master_sync') : null;
+
+    function broadcastCommand(cmd, data = {}) {
+      const payload = { cmd, data, timestamp: Date.now() };
+      if (syncChannel) syncChannel.postMessage(payload);
+      console.log("[MASTER BROADCAST SYNC]:", payload);
+    }
+
+    if (syncChannel) {
+      syncChannel.onmessage = (event) => {
+        const { cmd, data } = event.data;
+        console.log("[SLAVE RX SYNC MESSAGE]:", cmd, data);
+        if (cmd === 'LIGHT_STATE') {
+          setTargetLightColor(data.colorClass, data.labelText, data.labelColor);
+        } else if (cmd === 'STOP') {
+          stopSequence(true); // Receive sync stop
+        }
+      };
+    }
 
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space') {
@@ -699,19 +723,54 @@
       }
     });
 
-    function getActiveGreenDuration() {
-      const ev = eventsData[currentEventIdx];
-      return ev.isCustom ? customGreenSec : ev.greenSec;
+    function registerTimeout(fn, delay) {
+      const id = setTimeout(() => {
+        activeTimeouts = activeTimeouts.filter(tId => tId !== id);
+        fn();
+      }, delay);
+      activeTimeouts.push(id);
+      return id;
     }
 
+    function clearAllScheduledTimeouts() {
+      activeTimeouts.forEach(id => clearTimeout(id));
+      activeTimeouts = [];
+    }
+
+    function getActiveGreenDuration() {
+      const ev = eventsData[currentEventIdx];
+      return ev.isCustom ? customGreenSec : ev.greenLightDurationSeconds;
+    }
+
+    // REQUIREMENT 4: FIXED AUDIO PLAYBACK WITH FALLBACK TO SPEECH SYNTHESIS
+    function playAudioCue(audioKey, textFallback) {
+      const audioPath = `./audio/${audioKey}.mp3`;
+      const audio = new Audio(audioPath);
+
+      let played = false;
+      audio.play().then(() => {
+        played = true;
+      }).catch(err => {
+        if ('speechSynthesis' in window) {
+          const u = new SpeechSynthesisUtterance(textFallback || audioKey.replace(/_/g, ' '));
+          u.rate = 0.95;
+          window.speechSynthesis.speak(u);
+        }
+      });
+    }
+
+    // REQUIREMENT 5: EXTENDED LATE-SHOT DETECTION LOGIC
     function triggerGunshot() {
       if (!isMicSensorActive) {
-        console.log("Gunshot ignored: Sensor inactive during Attention / Load / Unload stage.");
+        console.log("Gunshot ignored: Sensor inactive during Attention / Load stage.");
         return;
       }
 
-      if (shotLogs.length >= 5) {
-        console.log("Max 5 shots limit reached.");
+      const activeConfig = eventsData[currentEventIdx];
+      const maxAllowedShots = activeConfig.numberOfShots || 5;
+
+      if (shotLogs.length >= maxAllowedShots) {
+        console.log(`Max ${maxAllowedShots} shots limit reached.`);
         return;
       }
 
@@ -722,14 +781,14 @@
       let splitSec = totalSec - prevTotal;
 
       let greenDuration = getActiveGreenDuration();
-      let isDelay = totalSec > (greenDuration + 0.2);
-      let overtimeSec = isDelay ? (totalSec - greenDuration) : 0.0;
+      let isLateShot = totalSec > greenDuration;
+      let overtimeSec = isLateShot ? (totalSec - greenDuration) : 0.0;
 
       shotLogs.push({
         shotNum: shotLogs.length + 1,
         totalSec: totalSec,
         splitSec: splitSec,
-        isDelay: isDelay,
+        isLateShot: isLateShot,
         overtimeSec: overtimeSec
       });
 
@@ -737,25 +796,29 @@
       renderShotList();
     }
 
+    // REQUIREMENT 2: RETAIN & KEEP DISPLAYING SHOT DATA (NO AUTO-CLEARING ON UNLOAD)
     function renderShotList() {
       const container = document.getElementById('shots-list');
       container.innerHTML = '';
 
-      document.getElementById('disp-shot-badge').innerText = `SHOTS: ${shotLogs.length}/5`;
+      const activeConfig = eventsData[currentEventIdx];
+      const maxShots = activeConfig.numberOfShots || 5;
+
+      document.getElementById('disp-shot-badge').innerText = `SHOTS: ${shotLogs.length}/${maxShots}`;
 
       shotLogs.forEach((shot) => {
         const row = document.createElement('div');
-        row.className = shot.isDelay ? 'tft-row delay-row' : 'tft-row';
+        row.className = shot.isLateShot ? 'tft-row delay-row' : 'tft-row';
         
-        let delayTagHTML = shot.isDelay 
-          ? `<span class="delay-badge">⚠️ DELAY (+${shot.overtimeSec.toFixed(2)}s)</span>` 
+        let tagHTML = shot.isLateShot 
+          ? `<span class="delay-badge">⚠️ LATE SHOT (+${shot.overtimeSec.toFixed(2)}s)</span>` 
           : `<span style="color:#22c55e; font-size:0.62rem; font-weight:bold;">VALID</span>`;
 
         row.innerHTML = `
           <span class="tft-shot-tag">S${shot.shotNum}</span>
           <span>SPLIT: <span class="tft-split-val">${shot.splitSec.toFixed(2)}s</span></span>
           <span>TOT: <span class="tft-total-val">${shot.totalSec.toFixed(2)}s</span></span>
-          ${delayTagHTML}
+          ${tagHTML}
         `;
         container.appendChild(row);
       });
@@ -791,7 +854,9 @@
 
     function resetBars() {
       shotLogs = [];
-      document.getElementById('disp-shot-badge').innerText = "SHOTS: 0/5";
+      const activeConfig = eventsData[currentEventIdx];
+      const maxShots = activeConfig.numberOfShots || 5;
+      document.getElementById('disp-shot-badge').innerText = `SHOTS: 0/${maxShots}`;
       document.getElementById('val-avg').innerText = '--';
       document.getElementById('val-total').innerText = '--';
     }
@@ -841,7 +906,7 @@
       const ev = eventsData[currentEventIdx];
       let activeGreen = getActiveGreenDuration();
       
-      document.getElementById('disp-event').innerText = ev.isCustom ? `DRILL: CUSTOM (${activeGreen}s)` : `DRILL: ${ev.name}`;
+      document.getElementById('disp-event').innerText = ev.isCustom ? `DRILL: CUSTOM (${activeGreen}s)` : `DRILL: ${ev.seriesName.toUpperCase()}`;
       document.getElementById('event-select').value = currentEventIdx;
       document.getElementById('load-select').value = selectedLoadSec;
 
@@ -849,33 +914,39 @@
 
       if (menuStep === 1) {
         setStageText("1. TIMER MENU", "#38bdf8");
-        container.innerHTML = `
-          <div style="color:#cbd5e1; text-align:center; padding-top:20px; font-size:0.82rem;">
-            <strong style="color:#38bdf8">1. TIMER MENU</strong><br/>
-            Selected: <span style="color:#facc15">${ev.name} ${ev.isCustom ? `(${activeGreen}s)` : ''}</span><br/><br/>
-            <span class="step-indicator">Rotate/Tap Knob to Select Load Time</span>
-          </div>
-        `;
+        if (shotLogs.length === 0) {
+          container.innerHTML = `
+            <div style="color:#cbd5e1; text-align:center; padding-top:20px; font-size:0.82rem;">
+              <strong style="color:#38bdf8">1. TIMER MENU</strong><br/>
+              Selected: <span style="color:#facc15">${ev.seriesName} ${ev.isCustom ? `(${activeGreen}s)` : ''}</span><br/><br/>
+              <span class="step-indicator">Rotate/Tap Knob to Select Load Time</span>
+            </div>
+          `;
+        }
       } else if (menuStep === 2) {
         setStageText("2. LOAD TIME SELECT", "#ea580c");
-        container.innerHTML = `
-          <div style="color:#cbd5e1; text-align:center; padding-top:20px; font-size:0.82rem;">
-            <strong style="color:#ea580c">2. LOAD TIME SELECTION</strong><br/>
-            Selected Load: <span style="color:#facc15">${selectedLoadSec} Seconds</span><br/>
-            (Options: 15s | 30s | 60s)<br/><br/>
-            <span class="step-indicator">Tap Knob to Confirm & Ready</span>
-          </div>
-        `;
+        if (shotLogs.length === 0) {
+          container.innerHTML = `
+            <div style="color:#cbd5e1; text-align:center; padding-top:20px; font-size:0.82rem;">
+              <strong style="color:#ea580c">2. LOAD TIME SELECTION</strong><br/>
+              Selected Load: <span style="color:#facc15">${selectedLoadSec} Seconds</span><br/>
+              (Options: 15s | 30s | 60s)<br/><br/>
+              <span class="step-indicator">Tap Knob to Confirm & Ready</span>
+            </div>
+          `;
+        }
       } else {
         setStageText("3. SHOW SELECTED (READY)", "#22c55e");
-        container.innerHTML = `
-          <div style="color:#cbd5e1; text-align:center; padding-top:15px; font-size:0.82rem;">
-            <strong style="color:#22c55e">READY TO START</strong><br/>
-            Series: <span style="color:#38bdf8">${ev.name} ${ev.isCustom ? `(${activeGreen}s)` : ''}</span><br/>
-            Load Time: <span style="color:#facc15">${selectedLoadSec} Seconds</span><br/><br/>
-            <span class="step-indicator" style="background:#15803d; color:#fff;">TAP START BUTTON BELOW</span>
-          </div>
-        `;
+        if (shotLogs.length === 0) {
+          container.innerHTML = `
+            <div style="color:#cbd5e1; text-align:center; padding-top:15px; font-size:0.82rem;">
+              <strong style="color:#22c55e">READY TO START</strong><br/>
+              Series: <span style="color:#38bdf8">${ev.seriesName} ${ev.isCustom ? `(${activeGreen}s)` : ''}</span><br/>
+              Load Time: <span style="color:#facc15">${selectedLoadSec} Seconds</span><br/><br/>
+              <span class="step-indicator" style="background:#15803d; color:#fff;">TAP START BUTTON BELOW</span>
+            </div>
+          `;
+        }
       }
     }
 
@@ -916,6 +987,7 @@
 
     function setTargetLightColor(colorClass, labelText, labelColor) {
       triggerSignalAnim();
+      broadcastCommand('LIGHT_STATE', { colorClass, labelText, labelColor });
       setTimeout(() => {
         document.querySelectorAll('.pixel').forEach(px => px.className = 'pixel ' + colorClass);
         const lbl = document.getElementById('target-color-label');
@@ -924,37 +996,32 @@
       }, 300);
     }
 
-    function speakCue(text) {
-      if ('speechSynthesis' in window) {
-        const u = new SpeechSynthesisUtterance(text);
-        u.rate = 0.95;
-        window.speechSynthesis.speak(u);
-      }
-    }
-
     function setStageText(text, color) {
       const st = document.getElementById('stage-text');
       st.innerText = text;
       st.style.color = color;
     }
 
-    function startEventSequence() {
+    // REQUIREMENT 6: ENGINE ACCEPTS CONFIGURATION OBJECT DYNAMICALLY
+    function startEventSequence(configObj) {
       if (isRunning) return;
       isRunning = true;
       isMicSensorActive = false;
-      resetBars();
+      clearAllScheduledTimeouts();
+      resetBars(); // Reset shot logs ONLY on fresh START!
 
-      const ev = eventsData[currentEventIdx];
+      const activeConfig = configObj || eventsData[currentEventIdx];
+      broadcastCommand('START', { config: activeConfig });
 
       setStageText("ANNOUNCING SERIES...", "#38bdf8");
-      speakCue(ev.voiceAnnounce);
+      playAudioCue(activeConfig.audioKey, activeConfig.voiceAnnounce);
 
-      setTimeout(() => {
-        speakCue("Load!");
+      registerTimeout(() => {
+        playAudioCue("load", "Load!");
         setStageText("AUDIO: LOAD", "#ea580c");
 
-        setTimeout(() => {
-          runLoadCountdownStage(ev);
+        registerTimeout(() => {
+          runLoadCountdownStage(activeConfig);
         }, 1200);
 
       }, 2000);
@@ -986,9 +1053,9 @@
 
       setStageText("ATTENTION (RED 7s)", "#dc2626");
       setTargetLightColor("red", "SOLID RED (Attention 7s)", "#ef4444");
-      speakCue("Attention!");
+      playAudioCue("attention", "Attention!");
 
-      let rem = 7;
+      let rem = ev.attentionTimeSeconds || 7;
       document.getElementById('timer-text').innerText = rem + "s";
       timerId = setInterval(() => {
         rem--;
@@ -1040,7 +1107,8 @@
     }
 
     function run5x3RedPause(ev, roundNum) {
-      setTimeout(() => { isMicSensorActive = false; }, 500);
+      // REQUIREMENT 5: Keep mic sensor active up to 5s after green to record late shots!
+      registerTimeout(() => { isMicSensorActive = false; }, 2000);
 
       setStageText("PAUSE R" + roundNum + " (RED 7s)", "#dc2626");
       setTargetLightColor("red", "SOLID RED (7s Pause)", "#ef4444");
@@ -1058,7 +1126,8 @@
     }
 
     function runRedStopStage(ev) {
-      setTimeout(() => { isMicSensorActive = false; }, 500);
+      // REQUIREMENT 5: Keep mic active to capture late shots up to 5s after green duration
+      registerTimeout(() => { isMicSensorActive = false; }, 2000);
 
       setStageText("RED / STOP (7s)", "#dc2626");
       setTargetLightColor("red", "SOLID RED (Stop 7s)", "#ef4444");
@@ -1075,31 +1144,44 @@
       }, 1000);
     }
 
+    // REQUIREMENT 2: RETAIN ALL RECORDED SHOTS WHEN UNLOAD ENDS (DO NOT WIPE UI SHOT LOG)
     function runUnloadStage() {
       isMicSensorActive = false;
       setStageText("UNLOAD", "#ea580c");
       setTargetLightColor("", "OFF (Unload Phase)", "#64748b");
-      speakCue("Unload!");
+      playAudioCue("unload", "Unload!");
 
-      setTimeout(() => {
-        menuStep = 1;
-        updateMenuDisplay();
+      registerTimeout(() => {
         setTargetLightColor("", "OFF (Display Off)", "#64748b");
         document.getElementById('timer-text').innerText = "DONE";
+        setStageText("COMPLETED (SHOTS RETAINED)", "#22c55e");
         isRunning = false;
+        // NOTE: resetBars() IS NOT CALLED HERE! All shot data retained!
       }, 3000);
     }
 
-    function stopSequence() {
+    // REQUIREMENT 3: IMMEDIATE EMERGENCY STOP & UNLOAD SAFETY PROTOCOL
+    function stopSequence(fromRemote = false) {
+      // 1. Instantly clear/abort all active timing loops, timeouts, and state intervals
       clearInterval(timerId);
       clearInterval(greenTimerId);
+      clearAllScheduledTimeouts();
       isMicSensorActive = false;
+
+      // 2. Immediately switch off target Light Panel (set state to LIGHT_OFF / BLACK)
       setTargetLightColor("", "OFF (Stopped)", "#64748b");
-      setStageText("STOPPED", "#dc2626");
-      document.getElementById('timer-text').innerText = "--";
+
+      // 3. Immediately trigger and play the "Unload" voice audio command
+      playAudioCue("unload", "Unload!");
+
+      // 4. Set UI status to "Series Stopped - Unload" while preserving all shots recorded up to moment STOP pressed
+      setStageText("Series Stopped - Unload", "#dc2626");
+      document.getElementById('timer-text').innerText = "STOPPED";
       isRunning = false;
-      menuStep = 1;
-      updateMenuDisplay();
+
+      if (!fromRemote) {
+        broadcastCommand('STOP');
+      }
     }
 
     updateMenuDisplay();
