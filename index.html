@@ -544,7 +544,6 @@
 
       <!-- Selection Controls (Series + Load Time + Custom Time) -->
       <div class="selection-controls">
-        <!-- REQUIREMENT 1: FIX TYPO "4 minute series" -->
         <select class="event-select-box" id="event-select" onchange="onSeriesDropdownChanged()">
           <option value="0">1. 4 Minute Series</option>
           <option value="1">2. 5 × 3 Seconds Series</option>
@@ -668,7 +667,6 @@
       matrix.appendChild(p);
     }
 
-    // REQUIREMENT 6: CLEAN DATA STRUCTURE / CONFIGURATION OBJECTS FOR SERIES
     const eventsData = [
       { id: 1, seriesName: "4 Minute Series", voiceAnnounce: "4 minute series", audioKey: "4_minute_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 240, numberOfShots: 5, is5x3: false, isCustom: false },
       { id: 2, seriesName: "5 × 3 Seconds Series", voiceAnnounce: "5 by 3 seconds series", audioKey: "5_by_3_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 3, numberOfShots: 5, is5x3: true, isCustom: false },
@@ -695,7 +693,6 @@
     let shotLogs = [];
     let knobAngle = 0;
 
-    // REQUIREMENT 7: MASTER/SLAVE BROADCAST SYNC ENGINE (BroadcastChannel + Web Bluetooth / WebRTC Stub)
     const syncChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('range_master_sync') : null;
 
     function broadcastCommand(cmd, data = {}) {
@@ -707,11 +704,10 @@
     if (syncChannel) {
       syncChannel.onmessage = (event) => {
         const { cmd, data } = event.data;
-        console.log("[SLAVE RX SYNC MESSAGE]:", cmd, data);
         if (cmd === 'LIGHT_STATE') {
           setTargetLightColor(data.colorClass, data.labelText, data.labelColor);
         } else if (cmd === 'STOP') {
-          stopSequence(true); // Receive sync stop
+          stopSequence(true);
         }
       };
     }
@@ -742,15 +738,11 @@
       return ev.isCustom ? customGreenSec : ev.greenLightDurationSeconds;
     }
 
-    // REQUIREMENT 4: FIXED AUDIO PLAYBACK WITH FALLBACK TO SPEECH SYNTHESIS
     function playAudioCue(audioKey, textFallback) {
       const audioPath = `./audio/${audioKey}.mp3`;
       const audio = new Audio(audioPath);
 
-      let played = false;
-      audio.play().then(() => {
-        played = true;
-      }).catch(err => {
+      audio.play().catch(() => {
         if ('speechSynthesis' in window) {
           const u = new SpeechSynthesisUtterance(textFallback || audioKey.replace(/_/g, ' '));
           u.rate = 0.95;
@@ -759,10 +751,9 @@
       });
     }
 
-    // REQUIREMENT 5: EXTENDED LATE-SHOT DETECTION LOGIC
     function triggerGunshot() {
       if (!isMicSensorActive) {
-        console.log("Gunshot ignored: Sensor inactive during Attention / Load stage.");
+        console.log("Gunshot ignored: Sensor inactive.");
         return;
       }
 
@@ -796,7 +787,6 @@
       renderShotList();
     }
 
-    // REQUIREMENT 2: RETAIN & KEEP DISPLAYING SHOT DATA (NO AUTO-CLEARING ON UNLOAD)
     function renderShotList() {
       const container = document.getElementById('shots-list');
       container.innerHTML = '';
@@ -852,6 +842,7 @@
       } catch(e){}
     }
 
+    // BUG FIX: RESET SHOT LOGS ARRAY AND UI DISPLAY SCREEN COMPLETELY
     function resetBars() {
       shotLogs = [];
       const activeConfig = eventsData[currentEventIdx];
@@ -859,6 +850,8 @@
       document.getElementById('disp-shot-badge').innerText = `SHOTS: 0/${maxShots}`;
       document.getElementById('val-avg').innerText = '--';
       document.getElementById('val-total').innerText = '--';
+      const container = document.getElementById('shots-list');
+      container.innerHTML = '';
     }
 
     function onKnobClick() {
@@ -879,12 +872,14 @@
       }
     }
 
+    // BUG FIX: SELECTING A DIFFERENT SERIES COMPLETELY RESETS AND CLEARS THE SHOT LOG ARRAY & UI SCREEN
     function onSeriesDropdownChanged() {
       if (isRunning) return;
       currentEventIdx = parseInt(document.getElementById('event-select').value);
       const ev = eventsData[currentEventIdx];
       document.getElementById('custom-time-input').style.display = ev.isCustom ? 'block' : 'none';
       menuStep = 2;
+      resetBars(); // Completely reset and clear screen on series change!
       updateMenuDisplay();
     }
 
@@ -1002,13 +997,13 @@
       st.style.color = color;
     }
 
-    // REQUIREMENT 6: ENGINE ACCEPTS CONFIGURATION OBJECT DYNAMICALLY
+    // BUG FIX: PRESSING START TO BEGIN ANY NEW SERIES COMPLETELY RESETS AND CLEARS THE SHOT LOG ARRAY & UI SCREEN
     function startEventSequence(configObj) {
       if (isRunning) return;
       isRunning = true;
       isMicSensorActive = false;
       clearAllScheduledTimeouts();
-      resetBars(); // Reset shot logs ONLY on fresh START!
+      resetBars(); // Completely reset and clear shot log array & UI screen on START!
 
       const activeConfig = configObj || eventsData[currentEventIdx];
       broadcastCommand('START', { config: activeConfig });
@@ -1107,7 +1102,6 @@
     }
 
     function run5x3RedPause(ev, roundNum) {
-      // REQUIREMENT 5: Keep mic sensor active up to 5s after green to record late shots!
       registerTimeout(() => { isMicSensorActive = false; }, 2000);
 
       setStageText("PAUSE R" + roundNum + " (RED 7s)", "#dc2626");
@@ -1126,7 +1120,6 @@
     }
 
     function runRedStopStage(ev) {
-      // REQUIREMENT 5: Keep mic active to capture late shots up to 5s after green duration
       registerTimeout(() => { isMicSensorActive = false; }, 2000);
 
       setStageText("RED / STOP (7s)", "#dc2626");
@@ -1144,7 +1137,6 @@
       }, 1000);
     }
 
-    // REQUIREMENT 2: RETAIN ALL RECORDED SHOTS WHEN UNLOAD ENDS (DO NOT WIPE UI SHOT LOG)
     function runUnloadStage() {
       isMicSensorActive = false;
       setStageText("UNLOAD", "#ea580c");
@@ -1156,25 +1148,18 @@
         document.getElementById('timer-text').innerText = "DONE";
         setStageText("COMPLETED (SHOTS RETAINED)", "#22c55e");
         isRunning = false;
-        // NOTE: resetBars() IS NOT CALLED HERE! All shot data retained!
       }, 3000);
     }
 
-    // REQUIREMENT 3: IMMEDIATE EMERGENCY STOP & UNLOAD SAFETY PROTOCOL
     function stopSequence(fromRemote = false) {
-      // 1. Instantly clear/abort all active timing loops, timeouts, and state intervals
       clearInterval(timerId);
       clearInterval(greenTimerId);
       clearAllScheduledTimeouts();
       isMicSensorActive = false;
 
-      // 2. Immediately switch off target Light Panel (set state to LIGHT_OFF / BLACK)
       setTargetLightColor("", "OFF (Stopped)", "#64748b");
-
-      // 3. Immediately trigger and play the "Unload" voice audio command
       playAudioCue("unload", "Unload!");
 
-      // 4. Set UI status to "Series Stopped - Unload" while preserving all shots recorded up to moment STOP pressed
       setStageText("Series Stopped - Unload", "#dc2626");
       document.getElementById('timer-text').innerText = "STOPPED";
       isRunning = false;
