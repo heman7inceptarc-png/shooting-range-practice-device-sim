@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b0c10" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Range Master Pro Timer — Mobile Responsive Simulator</title>
+  <title>Range Master Pro Timer — Customised Series Builder & ISSF Timer</title>
   <style>
     :root {
       --rugged-bg: #1c1d21;
@@ -130,7 +130,7 @@
       border-radius: 16px;
       padding: 14px;
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
       box-shadow: 0 12px 28px rgba(0,0,0,0.8);
       display: flex;
       flex-direction: column;
@@ -157,7 +157,7 @@
       width: 100%;
     }
 
-    .event-select-box, .load-select-box, .custom-time-box {
+    .event-select-box, .load-select-box, .builder-btn {
       background: #0f172a;
       color: #38bdf8;
       border: 2px solid #334155;
@@ -171,7 +171,12 @@
 
     .event-select-box { flex: 2; min-width: 180px; }
     .load-select-box { flex: 1; min-width: 100px; }
-    .custom-time-box { width: 90px; display: none; }
+    
+    .builder-btn {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff;
+      border: 1px solid #38bdf8;
+    }
 
     /* TFT Screen Container */
     .tft-display {
@@ -498,6 +503,175 @@
       border: 1px solid #334155;
     }
 
+    /* CUSTOM SERIES BUILDER MODAL / OVERLAY */
+    .builder-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(4, 8, 16, 0.92);
+      z-index: 9999;
+      overflow-y: auto;
+      padding: 15px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .builder-modal {
+      background: #17181c;
+      border: 3px solid #38bdf8;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 650px;
+      padding: 20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .builder-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 10px;
+    }
+
+    .builder-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #38bdf8;
+    }
+
+    .close-modal-btn {
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .slot-tabs-bar {
+      display: flex;
+      gap: 5px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+    }
+
+    .slot-tab {
+      padding: 6px 12px;
+      border-radius: 15px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .slot-tab.active {
+      background: #0284c7;
+      color: #fff;
+      border-color: #38bdf8;
+    }
+
+    .section-box {
+      background: #0d1322;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #facc15;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-group label {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-weight: bold;
+    }
+
+    .form-control {
+      background: #17181c;
+      border: 1px solid #334155;
+      color: #38bdf8;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .cmd-buttons-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .cmd-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #475569;
+      background: #1e293b;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .cmd-btn:hover { background: #334155; }
+
+    .sequence-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    .sequence-table th, .sequence-table td {
+      border: 1px solid #1e293b;
+      padding: 6px;
+      text-align: left;
+    }
+
+    .sequence-table th {
+      background: #0f172a;
+      color: #38bdf8;
+    }
+
+    .action-btn-sm {
+      padding: 2px 6px;
+      font-size: 0.65rem;
+      border-radius: 3px;
+      border: none;
+      cursor: pointer;
+      margin-right: 2px;
+    }
+
+    .badge-led-red { background: #dc2626; color: #fff; padding: 1px 4px; border-radius: 3px; font-weight: bold; font-size: 0.65rem; }
+    .badge-led-green { background: #16a34a; color: #fff; padding: 1px 4px; border-radius: 3px; font-weight: bold; font-size: 0.65rem; }
+    .badge-led-nc { background: #475569; color: #fff; padding: 1px 4px; border-radius: 3px; font-weight: bold; font-size: 0.65rem; }
+
     /* MEDIA QUERIES FOR MOBILE PHONES (< 600px) */
     @media (max-width: 600px) {
       body { padding: 6px; }
@@ -518,7 +692,7 @@
 <body>
 
   <h1>Range Master Pro</h1>
-  <div class="subtitle">📱 Mobile Responsive • ISSF & Custom Pistol Shooting Timer</div>
+  <div class="subtitle">📱 Mobile Responsive • ISSF & Customised Series Builder (Slots 1-10)</div>
 
   <!-- Top Bar Controls -->
   <div class="top-controls-bar">
@@ -542,7 +716,7 @@
         <span id="comm-status-badge">WIRED</span>
       </div>
 
-      <!-- Selection Controls (Series + Load Time + Custom Time) -->
+      <!-- Selection Controls (Series + Load Time + Custom Builder Button) -->
       <div class="selection-controls">
         <select class="event-select-box" id="event-select" onchange="onSeriesDropdownChanged()">
           <option value="0">1. 4 Minute Series</option>
@@ -553,16 +727,17 @@
           <option value="5">6. 6 Seconds Series</option>
           <option value="6">7. 4 Seconds Series</option>
           <option value="7">8. 150 Seconds Series</option>
-          <option value="8">9. Custom Series</option>
+          <option value="8">9. Customised Series (Slots 1–10)</option>
         </select>
 
-        <input type="number" class="custom-time-box" id="custom-time-input" value="15" min="1" max="300" placeholder="Sec" onchange="onCustomTimeChanged()" />
-
         <select class="load-select-box" id="load-select" onchange="onLoadDropdownChanged()">
+          <option value="5">LOAD: 5s</option>
           <option value="15">LOAD: 15s</option>
           <option value="30">LOAD: 30s</option>
           <option value="60" selected>LOAD: 60s</option>
         </select>
+
+        <button class="builder-btn" id="open-builder-btn" onclick="openCustomBuilderModal()" style="display:none;">⚙️ EDIT CUSTOM SLOT</button>
       </div>
 
       <!-- TFT Screen -->
@@ -659,6 +834,89 @@
 
   </div>
 
+  <!-- CUSTOMISED SERIES BUILDER MODAL OVERLAY -->
+  <div class="builder-overlay" id="custom-builder-modal">
+    <div class="builder-modal">
+      <div class="builder-header">
+        <div class="builder-title">⚙️ CUSTOMISED SERIES BUILDER (SLOTS 1–10)</div>
+        <button class="close-modal-btn" onclick="closeCustomBuilderModal()">✕</button>
+      </div>
+
+      <!-- Slot Selection Tabs (Slots 1-10) -->
+      <div class="slot-tabs-bar" id="slot-tabs-container">
+        <!-- Generated dynamically via JS -->
+      </div>
+
+      <!-- SECTION 1: EVENT DETAILS CONFIGURATION -->
+      <div class="section-box">
+        <div class="section-title">SECTION 1: EVENT DETAILS CONFIGURATION</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Series Name</label>
+            <input type="text" class="form-control" id="builder-slot-name" placeholder="Custom Series 1" onchange="saveActiveSlotDetails()" />
+          </div>
+          <div class="form-group">
+            <label>Load Time</label>
+            <select class="form-control" id="builder-load-time" onchange="saveActiveSlotDetails()">
+              <option value="5">5 Seconds</option>
+              <option value="15">15 Seconds</option>
+              <option value="30">30 Seconds</option>
+              <option value="60" selected>60 Seconds</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Default Target</label>
+            <select class="form-control" id="builder-default-target" onchange="saveActiveSlotDetails()">
+              <option value="Air Pistol 10m">Air Pistol 10m</option>
+              <option value="25m" selected>25m Pistol</option>
+              <option value="50m">50m Pistol</option>
+              <option value="Rapid Fire 25m">Rapid Fire 25m</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: COMMAND BUILDER & LIBRARY RULES -->
+      <div class="section-box">
+        <div class="section-title">SECTION 2: COMMAND BUILDER</div>
+        
+        <div style="font-size:0.75rem; color:#cbd5e1; margin-bottom:8px;">Add Commands into Ordered Sequence:</div>
+        <div class="cmd-buttons-grid">
+          <button class="cmd-btn" onclick="addCommandToActiveSlot('Attention', 7)">🔴 Attention (1-10s)</button>
+          <button class="cmd-btn" onclick="addCommandToActiveSlot('Start', 15)">🟢 Start (1-300s)</button>
+          <button class="cmd-btn" onclick="addCommandToActiveSlot('Stop', 0)">⏹️ Stop (0s)</button>
+          <button class="cmd-btn" onclick="addCommandToActiveSlot('Face Targets', 10)">🎯 Face Targets (1-300s)</button>
+          <button class="cmd-btn" onclick="addCommandToActiveSlot('Edge Targets', 7)">📐 Edge Targets (1-300s)</button>
+          <button class="cmd-btn" onclick="addCommandToActiveSlot('Pace Marker', 8)">⏱️ Pace Marker (1-300s)</button>
+          <button class="cmd-btn" onclick="addCommandToActiveSlot('Done', 0)">🏁 Done (0s)</button>
+        </div>
+
+        <div style="max-height: 180px; overflow-y: auto;">
+          <table class="sequence-table">
+            <thead>
+              <tr>
+                <th style="width:30px;">#</th>
+                <th>Command</th>
+                <th>Duration</th>
+                <th>LED State</th>
+                <th style="width:90px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="sequence-steps-list">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div style="display:flex; justify-content:space-between; gap:10px;">
+        <button class="rugged-btn" style="background:#475569; color:#fff;" onclick="saveCustomSlotsToStorage(); alert('Slot configuration saved!');">💾 SAVE SERIES</button>
+        <button class="rugged-btn btn-start-illuminate" onclick="closeCustomBuilderModal(); startEventSequence();">▶️ RUN CUSTOM SERIES</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const matrix = document.getElementById('matrix');
     for (let i = 0; i < 64; i++) {
@@ -667,6 +925,7 @@
       matrix.appendChild(p);
     }
 
+    // ISSF EVENTS + CUSTOM BUILDER SLOTS
     const eventsData = [
       { id: 1, seriesName: "4 Minute Series", voiceAnnounce: "4 minute series", audioKey: "4_minute_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 240, numberOfShots: 5, is5x3: false, isCustom: false },
       { id: 2, seriesName: "5 × 3 Seconds Series", voiceAnnounce: "5 by 3 seconds series", audioKey: "5_by_3_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 3, numberOfShots: 5, is5x3: true, isCustom: false },
@@ -676,12 +935,33 @@
       { id: 6, seriesName: "6 Seconds Series", voiceAnnounce: "6 seconds series", audioKey: "6_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 6, numberOfShots: 5, is5x3: false, isCustom: false },
       { id: 7, seriesName: "4 Seconds Series", voiceAnnounce: "4 seconds series", audioKey: "4_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 4, numberOfShots: 5, is5x3: false, isCustom: false },
       { id: 8, seriesName: "150 Seconds Series", voiceAnnounce: "150 seconds series", audioKey: "150_seconds_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 150, numberOfShots: 5, is5x3: false, isCustom: false },
-      { id: 9, seriesName: "Custom Series", voiceAnnounce: "Custom series", audioKey: "custom_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 15, numberOfShots: 5, is5x3: false, isCustom: true }
+      { id: 9, seriesName: "Customised Series (Slots 1–10)", voiceAnnounce: "Custom series", audioKey: "custom_series", loadTimeSeconds: 60, attentionTimeSeconds: 7, greenLightDurationSeconds: 15, numberOfShots: 5, is5x3: false, isCustom: true }
     ];
 
+    // INITIALIZE 10 CUSTOM SERIES SLOTS STORAGE
+    let customSlotsData = Array.from({ length: 10 }, (_, i) => ({
+      slotId: i + 1,
+      seriesName: `Custom Series ${i + 1}`,
+      loadTimeSeconds: 60,
+      defaultTarget: "25m Pistol",
+      sequenceSteps: [
+        { command: "Attention", duration: 7, ledState: "RED" },
+        { command: "Start", duration: 15, ledState: "GREEN" },
+        { command: "Stop", duration: 0, ledState: "NO CHANGE" },
+        { command: "Edge Targets", duration: 7, ledState: "RED" },
+        { command: "Done", duration: 0, ledState: "RED" }
+      ]
+    }));
+
+    // Load persisted slots from localStorage
+    try {
+      const saved = localStorage.getItem("range_master_custom_slots");
+      if (saved) customSlotsData = JSON.parse(saved);
+    } catch(e) {}
+
+    let activeSlotIdx = 0; // 0 to 9 for Slot 1 to 10
     let currentEventIdx = 4;
     let selectedLoadSec = 60;
-    let customGreenSec = 15;
     let menuStep = 1;
     let activeCommMode = 'wired';
     let timerId = null;
@@ -719,6 +999,123 @@
       }
     });
 
+    function saveCustomSlotsToStorage() {
+      try {
+        localStorage.setItem("range_master_custom_slots", JSON.stringify(customSlotsData));
+      } catch(e){}
+    }
+
+    /* BUILDER MODAL UI HANDLERS */
+    function openCustomBuilderModal() {
+      renderSlotTabs();
+      loadActiveSlotToForm();
+      document.getElementById('custom-builder-modal').style.display = 'flex';
+    }
+
+    function closeCustomBuilderModal() {
+      document.getElementById('custom-builder-modal').style.display = 'none';
+      updateMenuDisplay();
+    }
+
+    function renderSlotTabs() {
+      const container = document.getElementById('slot-tabs-container');
+      container.innerHTML = '';
+      customSlotsData.forEach((slot, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `slot-tab ${idx === activeSlotIdx ? 'active' : ''}`;
+        btn.innerText = slot.seriesName || `Slot ${idx + 1}`;
+        btn.onclick = () => {
+          activeSlotIdx = idx;
+          renderSlotTabs();
+          loadActiveSlotToForm();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function loadActiveSlotToForm() {
+      const slot = customSlotsData[activeSlotIdx];
+      document.getElementById('builder-slot-name').value = slot.seriesName;
+      document.getElementById('builder-load-time').value = slot.loadTimeSeconds;
+      document.getElementById('builder-default-target').value = slot.defaultTarget;
+      renderSequenceTable();
+    }
+
+    function saveActiveSlotDetails() {
+      const slot = customSlotsData[activeSlotIdx];
+      slot.seriesName = document.getElementById('builder-slot-name').value || `Custom Series ${activeSlotIdx + 1}`;
+      slot.loadTimeSeconds = parseInt(document.getElementById('builder-load-time').value);
+      slot.defaultTarget = document.getElementById('builder-default-target').value;
+      saveCustomSlotsToStorage();
+      renderSlotTabs();
+    }
+
+    /* COMMAND BUILDER LOGIC (STRICT LED LOGIC ENFORCED) */
+    function getLEDStateForCommand(cmd) {
+      if (cmd === 'Start' || cmd === 'Face Targets') return 'GREEN';
+      if (cmd === 'Attention' || cmd === 'Edge Targets' || cmd === 'Done') return 'RED';
+      return 'NO CHANGE'; // Stop, Pace Marker during countdown
+    }
+
+    function addCommandToActiveSlot(cmdType, defaultDuration) {
+      const slot = customSlotsData[activeSlotIdx];
+      let dur = defaultDuration;
+      if (cmdType !== 'Stop' && cmdType !== 'Done') {
+        let inputDur = prompt(`Enter Duration in Seconds for ${cmdType}:`, defaultDuration);
+        if (inputDur === null) return;
+        dur = parseInt(inputDur) || defaultDuration;
+      }
+      slot.sequenceSteps.push({
+        command: cmdType,
+        duration: dur,
+        ledState: getLEDStateForCommand(cmdType)
+      });
+      saveCustomSlotsToStorage();
+      renderSequenceTable();
+    }
+
+    function renderSequenceTable() {
+      const slot = customSlotsData[activeSlotIdx];
+      const tbody = document.getElementById('sequence-steps-list');
+      tbody.innerHTML = '';
+
+      slot.sequenceSteps.forEach((step, idx) => {
+        const tr = document.createElement('tr');
+        let ledBadgeClass = step.ledState === 'GREEN' ? 'badge-led-green' : (step.ledState === 'RED' ? 'badge-led-red' : 'badge-led-nc');
+
+        tr.innerHTML = `
+          <td><strong>${idx + 1}</strong></td>
+          <td>${step.command}</td>
+          <td>${step.duration}s</td>
+          <td><span class="${ledBadgeClass}">${step.ledState}</span></td>
+          <td>
+            <button class="action-btn-sm" style="background:#334155; color:#fff;" onclick="moveStep(${idx}, -1)">⬆️</button>
+            <button class="action-btn-sm" style="background:#334155; color:#fff;" onclick="moveStep(${idx}, 1)">⬇️</button>
+            <button class="action-btn-sm" style="background:#dc2626; color:#fff;" onclick="deleteStep(${idx})">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function moveStep(idx, dir) {
+      const slot = customSlotsData[activeSlotIdx];
+      const targetIdx = idx + dir;
+      if (targetIdx < 0 || targetIdx >= slot.sequenceSteps.length) return;
+      const temp = slot.sequenceSteps[idx];
+      slot.sequenceSteps[idx] = slot.sequenceSteps[targetIdx];
+      slot.sequenceSteps[targetIdx] = temp;
+      saveCustomSlotsToStorage();
+      renderSequenceTable();
+    }
+
+    function deleteStep(idx) {
+      const slot = customSlotsData[activeSlotIdx];
+      slot.sequenceSteps.splice(idx, 1);
+      saveCustomSlotsToStorage();
+      renderSequenceTable();
+    }
+
     function registerTimeout(fn, delay) {
       const id = setTimeout(() => {
         activeTimeouts = activeTimeouts.filter(tId => tId !== id);
@@ -731,11 +1128,6 @@
     function clearAllScheduledTimeouts() {
       activeTimeouts.forEach(id => clearTimeout(id));
       activeTimeouts = [];
-    }
-
-    function getActiveGreenDuration() {
-      const ev = eventsData[currentEventIdx];
-      return ev.isCustom ? customGreenSec : ev.greenLightDurationSeconds;
     }
 
     function playAudioCue(audioKey, textFallback) {
@@ -757,11 +1149,8 @@
         return;
       }
 
-      const activeConfig = eventsData[currentEventIdx];
-      const maxAllowedShots = activeConfig.numberOfShots || 5;
-
-      if (shotLogs.length >= maxAllowedShots) {
-        console.log(`Max ${maxAllowedShots} shots limit reached.`);
+      if (shotLogs.length >= 5) {
+        console.log("Max 5 shots limit reached.");
         return;
       }
 
@@ -771,7 +1160,7 @@
       let prevTotal = shotLogs.length > 0 ? shotLogs[shotLogs.length - 1].totalSec : 0.0;
       let splitSec = totalSec - prevTotal;
 
-      let greenDuration = getActiveGreenDuration();
+      let greenDuration = 15; // Active window reference
       let isLateShot = totalSec > greenDuration;
       let overtimeSec = isLateShot ? (totalSec - greenDuration) : 0.0;
 
@@ -791,10 +1180,7 @@
       const container = document.getElementById('shots-list');
       container.innerHTML = '';
 
-      const activeConfig = eventsData[currentEventIdx];
-      const maxShots = activeConfig.numberOfShots || 5;
-
-      document.getElementById('disp-shot-badge').innerText = `SHOTS: ${shotLogs.length}/${maxShots}`;
+      document.getElementById('disp-shot-badge').innerText = `SHOTS: ${shotLogs.length}/5`;
 
       shotLogs.forEach((shot) => {
         const row = document.createElement('div');
@@ -842,12 +1228,9 @@
       } catch(e){}
     }
 
-    // BUG FIX: RESET SHOT LOGS ARRAY AND UI DISPLAY SCREEN COMPLETELY
     function resetBars() {
       shotLogs = [];
-      const activeConfig = eventsData[currentEventIdx];
-      const maxShots = activeConfig.numberOfShots || 5;
-      document.getElementById('disp-shot-badge').innerText = `SHOTS: 0/${maxShots}`;
+      document.getElementById('disp-shot-badge').innerText = `SHOTS: 0/5`;
       document.getElementById('val-avg').innerText = '--';
       document.getElementById('val-total').innerText = '--';
       const container = document.getElementById('shots-list');
@@ -872,21 +1255,16 @@
       }
     }
 
-    // BUG FIX: SELECTING A DIFFERENT SERIES COMPLETELY RESETS AND CLEARS THE SHOT LOG ARRAY & UI SCREEN
     function onSeriesDropdownChanged() {
       if (isRunning) return;
       currentEventIdx = parseInt(document.getElementById('event-select').value);
       const ev = eventsData[currentEventIdx];
-      document.getElementById('custom-time-input').style.display = ev.isCustom ? 'block' : 'none';
-      menuStep = 2;
-      resetBars(); // Completely reset and clear screen on series change!
-      updateMenuDisplay();
-    }
+      
+      const openBtn = document.getElementById('open-builder-btn');
+      openBtn.style.display = ev.isCustom ? 'block' : 'none';
 
-    function onCustomTimeChanged() {
-      let val = parseInt(document.getElementById('custom-time-input').value);
-      if (isNaN(val) || val < 1) val = 1;
-      customGreenSec = val;
+      menuStep = 2;
+      resetBars();
       updateMenuDisplay();
     }
 
@@ -899,9 +1277,9 @@
 
     function updateMenuDisplay() {
       const ev = eventsData[currentEventIdx];
-      let activeGreen = getActiveGreenDuration();
+      let displayName = ev.isCustom ? customSlotsData[activeSlotIdx].seriesName : ev.seriesName;
       
-      document.getElementById('disp-event').innerText = ev.isCustom ? `DRILL: CUSTOM (${activeGreen}s)` : `DRILL: ${ev.seriesName.toUpperCase()}`;
+      document.getElementById('disp-event').innerText = `DRILL: ${displayName.toUpperCase()}`;
       document.getElementById('event-select').value = currentEventIdx;
       document.getElementById('load-select').value = selectedLoadSec;
 
@@ -913,7 +1291,7 @@
           container.innerHTML = `
             <div style="color:#cbd5e1; text-align:center; padding-top:20px; font-size:0.82rem;">
               <strong style="color:#38bdf8">1. TIMER MENU</strong><br/>
-              Selected: <span style="color:#facc15">${ev.seriesName} ${ev.isCustom ? `(${activeGreen}s)` : ''}</span><br/><br/>
+              Selected: <span style="color:#facc15">${displayName}</span><br/><br/>
               <span class="step-indicator">Rotate/Tap Knob to Select Load Time</span>
             </div>
           `;
@@ -925,7 +1303,7 @@
             <div style="color:#cbd5e1; text-align:center; padding-top:20px; font-size:0.82rem;">
               <strong style="color:#ea580c">2. LOAD TIME SELECTION</strong><br/>
               Selected Load: <span style="color:#facc15">${selectedLoadSec} Seconds</span><br/>
-              (Options: 15s | 30s | 60s)<br/><br/>
+              (Options: 5s | 15s | 30s | 60s)<br/><br/>
               <span class="step-indicator">Tap Knob to Confirm & Ready</span>
             </div>
           `;
@@ -936,7 +1314,7 @@
           container.innerHTML = `
             <div style="color:#cbd5e1; text-align:center; padding-top:15px; font-size:0.82rem;">
               <strong style="color:#22c55e">READY TO START</strong><br/>
-              Series: <span style="color:#38bdf8">${ev.seriesName} ${ev.isCustom ? `(${activeGreen}s)` : ''}</span><br/>
+              Series: <span style="color:#38bdf8">${displayName}</span><br/>
               Load Time: <span style="color:#facc15">${selectedLoadSec} Seconds</span><br/><br/>
               <span class="step-indicator" style="background:#15803d; color:#fff;">TAP START BUTTON BELOW</span>
             </div>
@@ -997,26 +1375,35 @@
       st.style.color = color;
     }
 
-    // BUG FIX: PRESSING START TO BEGIN ANY NEW SERIES COMPLETELY RESETS AND CLEARS THE SHOT LOG ARRAY & UI SCREEN
+    /* SECTION 3: EXECUTION / RUN SEQUENCE FLOW ENGINE */
     function startEventSequence(configObj) {
       if (isRunning) return;
       isRunning = true;
       isMicSensorActive = false;
       clearAllScheduledTimeouts();
-      resetBars(); // Completely reset and clear shot log array & UI screen on START!
+      resetBars();
 
-      const activeConfig = configObj || eventsData[currentEventIdx];
-      broadcastCommand('START', { config: activeConfig });
+      const ev = eventsData[currentEventIdx];
+
+      if (ev.isCustom) {
+        runCustomSlotExecution(customSlotsData[activeSlotIdx]);
+      } else {
+        runStandardISSFSequence(ev);
+      }
+    }
+
+    function runStandardISSFSequence(ev) {
+      broadcastCommand('START', { config: ev });
 
       setStageText("ANNOUNCING SERIES...", "#38bdf8");
-      playAudioCue(activeConfig.audioKey, activeConfig.voiceAnnounce);
+      playAudioCue(ev.audioKey, ev.voiceAnnounce);
 
       registerTimeout(() => {
         playAudioCue("load", "Load!");
         setStageText("AUDIO: LOAD", "#ea580c");
 
         registerTimeout(() => {
-          runLoadCountdownStage(activeConfig);
+          runLoadCountdownStage(ev);
         }, 1200);
 
       }, 2000);
@@ -1082,7 +1469,7 @@
       }
       setTargetLightColor("green", "GREEN (Shooting Allowed)", "#22c55e");
 
-      let totalTimeSec = getActiveGreenDuration();
+      let totalTimeSec = ev.greenLightDurationSeconds;
 
       greenTimerId = setInterval(() => {
         let elapsedSec = (Date.now() - greenStartTime) / 1000;
@@ -1147,6 +1534,150 @@
         setTargetLightColor("", "OFF (Display Off)", "#64748b");
         document.getElementById('timer-text').innerText = "DONE";
         setStageText("COMPLETED (SHOTS RETAINED)", "#22c55e");
+        isRunning = false;
+      }, 3000);
+    }
+
+    /* CUSTOM SLOT EXECUTION ENGINE (SECTION 3) */
+    function runCustomSlotExecution(slot) {
+      broadcastCommand('START', { slot });
+
+      // 1. Play Series Name & LOAD
+      setStageText(`ANNOUNCING ${slot.seriesName.toUpperCase()}...`, "#38bdf8");
+      playAudioCue("custom_series", slot.seriesName);
+
+      registerTimeout(() => {
+        playAudioCue("load", "Load!");
+        setStageText("AUDIO: LOAD", "#ea580c");
+
+        // 2. Start Load Timer (LED = OFF)
+        registerTimeout(() => {
+          const fastLoad = document.getElementById('fast-load-chk').checked;
+          let actualLoad = fastLoad ? 5 : (slot.loadTimeSeconds || selectedLoadSec);
+          
+          setStageText(`LOAD TIMER (${actualLoad}s)`, "#ea580c");
+          setTargetLightColor("", "OFF (Load Phase)", "#64748b");
+
+          let rem = actualLoad;
+          document.getElementById('timer-text').innerText = rem + "s";
+
+          timerId = setInterval(() => {
+            rem--;
+            document.getElementById('timer-text').innerText = rem + "s";
+            if (rem <= 0) {
+              clearInterval(timerId);
+              // Audio Beep upon load timer completion
+              playGunshotSoundEffect();
+              // Execute sequential steps
+              executeStepIndex(slot, 0);
+            }
+          }, 1000);
+
+        }, 1200);
+
+      }, 2000);
+    }
+
+    function executeStepIndex(slot, stepIdx) {
+      if (stepIdx >= slot.sequenceSteps.length) {
+        // Drill finished
+        terminateCustomDrill();
+        return;
+      }
+
+      const step = slot.sequenceSteps[stepIdx];
+      console.log(`[EXECUTING STEP ${stepIdx + 1}]:`, step);
+
+      // Apply Strict LED Rules
+      if (step.ledState === 'GREEN') {
+        setTargetLightColor("green", `${step.command.toUpperCase()} (GREEN)`, "#22c55e");
+      } else if (step.ledState === 'RED') {
+        setTargetLightColor("red", `${step.command.toUpperCase()} (RED)`, "#ef4444");
+      }
+      // NO CHANGE keeps existing LED state
+
+      // Apply Command Actions
+      switch (step.command) {
+        case 'Attention':
+          isMicSensorActive = false;
+          setStageText(`ATTENTION (${step.duration}s)`, "#dc2626");
+          playAudioCue("attention", "Attention!");
+          break;
+
+        case 'Start':
+          isMicSensorActive = true;
+          greenStartTime = Date.now();
+          setStageText(`START (${step.duration}s)`, "#22c55e");
+          playAudioCue("start", "Start!");
+          break;
+
+        case 'Stop':
+          isMicSensorActive = false;
+          setStageText("STOP", "#dc2626");
+          // Instant 0s
+          executeStepIndex(slot, stepIdx + 1);
+          return;
+
+        case 'Face Targets':
+          setStageText(`FACE TARGETS (${step.duration}s)`, "#22c55e");
+          break;
+
+        case 'Edge Targets':
+          setStageText(`EDGE TARGETS (${step.duration}s)`, "#dc2626");
+          break;
+
+        case 'Pace Marker':
+          setStageText(`PACE MARKER (${step.duration}s)`, "#38bdf8");
+          // Rhythmic beeps during duration
+          let paceCount = 0;
+          let paceInterval = setInterval(() => {
+            playGunshotSoundEffect();
+            paceCount++;
+            if (paceCount >= step.duration) clearInterval(paceInterval);
+          }, 1000);
+          break;
+
+        case 'Done':
+          terminateCustomDrill();
+          return;
+
+        default:
+          break;
+      }
+
+      // Step Countdown Timer
+      if (step.duration > 0) {
+        let rem = step.duration;
+        document.getElementById('timer-text').innerText = rem + "s";
+        
+        timerId = setInterval(() => {
+          rem--;
+          document.getElementById('timer-text').innerText = rem + "s";
+          if (rem <= 0) {
+            clearInterval(timerId);
+
+            // Pace Marker turns RED upon completion
+            if (step.command === 'Pace Marker') {
+              setTargetLightColor("red", "PACE MARKER (RED)", "#ef4444");
+            }
+
+            // Automatically transition to next step
+            executeStepIndex(slot, stepIdx + 1);
+          }
+        }, 1000);
+      }
+    }
+
+    function terminateCustomDrill() {
+      isMicSensorActive = false;
+      setTargetLightColor("red", "EDGE (RED)", "#ef4444");
+      setStageText("CUSTOM DRILL DONE - UNLOAD", "#ea580c");
+      playAudioCue("unload", "Unload!");
+
+      registerTimeout(() => {
+        setTargetLightColor("", "OFF (Display Off)", "#64748b");
+        document.getElementById('timer-text').innerText = "DONE";
+        setStageText("COMPLETED (CUSTOM DRILL)", "#22c55e");
         isRunning = false;
       }, 3000);
     }
